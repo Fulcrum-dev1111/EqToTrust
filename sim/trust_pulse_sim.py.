@@ -1,0 +1,27 @@
+import numpy as np
+
+def kuramoto_step(theta, omega, K):
+    N = len(theta)
+    order = np.mean(np.exp(1j * theta))
+    R = np.abs(order)
+    psi = np.angle(order)
+    dtheta = omega + K * R * np.sin(psi - theta)
+    return theta + dtheta, R
+
+def simulate(N=100, steps=200, K=1.0, seed=42):
+    rng = np.random.default_rng(seed)
+    theta = rng.uniform(0, 2 * np.pi, N)
+    omega = rng.normal(1.0, 0.2, N)
+    R_series = np.zeros(steps)
+    for t in range(steps):
+        theta, R = kuramoto_step(theta, omega, K)
+        R_series[t] = R
+    return R_series
+
+def map_t(R_series, t_min=1.0, t_max=10.0):
+    return t_min + (t_max - t_min) * R_series
+
+if __name__ == "__main__":
+    R = simulate()
+    t_series = map_t(R)
+    print(f"R_mean: {np.mean(R):.4f} | t_mean: {np.mean(t_series):.4f}")
